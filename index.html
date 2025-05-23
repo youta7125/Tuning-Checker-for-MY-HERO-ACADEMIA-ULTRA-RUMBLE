@@ -12,6 +12,8 @@
   <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
   <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
   <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
+  <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
+  <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
   <!-- 必要に応じて追加 -->
 </div>
 
@@ -39,13 +41,17 @@ function limitColors() {
   const checked = Array.from(checkboxes).filter(cb => cb.checked);
   const btn = document.getElementById('search-btn');
   const error = document.getElementById('error-message');
-  if (checked.length < 1 || checked.length > 2 || !document.getElementById('company').value) {
-    error.textContent = 'キャラクターと色を1〜2つ選んでください';
+  const hasCompany = document.getElementById('company').value !== "";
+
+  // ✅ 色が 0〜2 個、かつキャラクターが選ばれていればOK
+  if (!hasCompany || checked.length > 2) {
+    error.textContent = 'キャラクターを選び、色は最大2つまでにしてください';
     btn.disabled = true;
   } else {
     error.textContent = '';
     btn.disabled = false;
   }
+
   checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
 }
 
