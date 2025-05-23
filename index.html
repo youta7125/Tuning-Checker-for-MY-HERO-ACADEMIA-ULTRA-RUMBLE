@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head><title>チューニングチェッカー</title></head>
+<body>
+<h2>キャラクターを選択</h2>
+<select id="character" onchange="checkForm()">
+  <option value="">--選択--</option>
+</select>
+
+<h2>色を選択（1〜2つ）</h2>
+<div id="types">
+  <label><input type="checkbox" value="赤" onchange="limittypes()"> 赤</label>
+  <label><input type="checkbox" value="黄" onchange="limittypes()"> 黄</label>
+  <label><input type="checkbox" value="紫" onchange="limittypes()"> 紫</label>
+  <label><input type="checkbox" value="青" onchange="limittypes()"> 青</label>
+  <label><input type="checkbox" value="緑" onchange="limittypes()"> 緑</label>
+</div>
+
+<p id="error-message" style="color:red;"></p>
+<button id="search-btn" onclick="search()" disabled>検索</button>
+<ul id="results"></ul>
+
+<script>
+const gasUrl = 'https://script.google.com/macros/s/AKfycbzXtWZVS_kZ7q_OdQRSmh3CSuUYuRhUuDqAbKmPK39PYmOHqKXsbQe7TArgyhEIdkv0/exec';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const res = await fetch(`${gasUrl}?mode=companies`);
+  const companies = await res.json();
+  const select = document.getElementById('character');
+  companies.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+});
+
+function limittypes() {
+  const checkboxes = document.querySelectorAll('#types input[type="checkbox"]');
+  const checked = Array.from(checkboxes).filter(cb => cb.checked);
+  const btn = document.getElementById('search-btn');
+  const error = document.getElementById('error-message');
+  if (checked.length < 1 || checked.length > 2 || !document.getElementById('character').value) {
+    error.textContent = 'キャラクターと色を1〜2つ選んでください';
+    btn.disabled = true;
+  } else {
+    error.textContent = '';
+    btn.disabled = false;
+  }
+  checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
+}
+
+function checkForm() { limittypes(); }
+
+async function search() {
+  const character = document.getElementById('character').value;
+  const types = Array.from(document.querySelectorAll('#types input[type="checkbox"]:checked')).map(cb => cb.value);
+  const params = new URLSearchParams();
+  params.append('character', character);
+  types.forEach(c => params.append('types', c));
+  const res = await fetch(`${gasUrl}?` + params.toString());
+  const data = await res.json();
+  const list = document.getElementById('results');
+  list.innerHTML = '';
+  data.forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${item.item}</strong> (${item.main_color}/${item.sub_color})<br>` +
+      item.details.map((d, i) => `詳細${i+1}: ${d}`).join('<br>');
+    list.appendChild(li);
+  });
+}
+</script>
+</body>
+</html>
