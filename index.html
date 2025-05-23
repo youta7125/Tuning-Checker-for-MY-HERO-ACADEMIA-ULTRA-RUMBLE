@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head><title>チューニングチェッカー</title></head>
+<head><title>コスチューム検索</title></head>
 <body>
 <h2>キャラクターを選択</h2>
-<select id="character" onchange="checkForm()">
+<select id="company" onchange="checkForm()">
   <option value="">--選択--</option>
 </select>
 
 <h2>色を選択（1〜2つ）</h2>
-<div id="types">
-  <label><input type="checkbox" value="赤" onchange="limittypes()"> 赤</label>
-  <label><input type="checkbox" value="黄" onchange="limittypes()"> 黄</label>
-  <label><input type="checkbox" value="紫" onchange="limittypes()"> 紫</label>
-  <label><input type="checkbox" value="青" onchange="limittypes()"> 青</label>
-  <label><input type="checkbox" value="緑" onchange="limittypes()"> 緑</label>
+<div id="colors">
+  <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
+  <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
+  <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
+  <!-- 必要に応じて追加 -->
 </div>
 
 <p id="error-message" style="color:red;"></p>
@@ -21,12 +20,12 @@
 <ul id="results"></ul>
 
 <script>
-const gasUrl = 'https://script.google.com/macros/s/AKfycbzXtWZVS_kZ7q_OdQRSmh3CSuUYuRhUuDqAbKmPK39PYmOHqKXsbQe7TArgyhEIdkv0/exec';
+const gasUrl = 'https://script.google.com/macros/s/XXXXX/exec'; // ← GASのURLに差し替え
 
 document.addEventListener('DOMContentLoaded', async () => {
   const res = await fetch(`${gasUrl}?mode=companies`);
   const companies = await res.json();
-  const select = document.getElementById('character');
+  const select = document.getElementById('company');
   companies.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c;
@@ -35,12 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-function limittypes() {
-  const checkboxes = document.querySelectorAll('#types input[type="checkbox"]');
+function limitColors() {
+  const checkboxes = document.querySelectorAll('#colors input[type="checkbox"]');
   const checked = Array.from(checkboxes).filter(cb => cb.checked);
   const btn = document.getElementById('search-btn');
   const error = document.getElementById('error-message');
-  if (checked.length < 1 || checked.length > 2 || !document.getElementById('character').value) {
+  if (checked.length < 1 || checked.length > 2 || !document.getElementById('company').value) {
     error.textContent = 'キャラクターと色を1〜2つ選んでください';
     btn.disabled = true;
   } else {
@@ -50,22 +49,32 @@ function limittypes() {
   checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
 }
 
-function checkForm() { limittypes(); }
+function checkForm() { limitColors(); }
 
 async function search() {
-  const character = document.getElementById('character').value;
-  const types = Array.from(document.querySelectorAll('#types input[type="checkbox"]:checked')).map(cb => cb.value);
+  const company = document.getElementById('company').value;
+  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value);
   const params = new URLSearchParams();
-  params.append('character', character);
-  types.forEach(c => params.append('types', c));
+  params.append('company', company);
+  colors.forEach(c => params.append('colors', c));
   const res = await fetch(`${gasUrl}?` + params.toString());
   const data = await res.json();
   const list = document.getElementById('results');
   list.innerHTML = '';
+
+  if (data.length === 0) {
+    list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+    return;
+  }
+
   data.forEach(item => {
     const li = document.createElement('li');
-    li.innerHTML = `<strong>${item.item}</strong> (${item.main_color}/${item.sub_color})<br>` +
-      item.details.map((d, i) => `詳細${i+1}: ${d}`).join('<br>');
+    li.innerHTML = `
+      <strong>コスチューム：${item.costume}</strong><br>
+      キャラクター：${item.character}<br>
+      メイン色：${item.main_color}／サブ色：${item.sub_color}<br>
+      ${item.details.map((d, i) => `スロット${i+1}：${d}`).join('<br>')}
+    `;
     list.appendChild(li);
   });
 }
