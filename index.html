@@ -1,58 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>コスチューム検索アプリ</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
-    }
-    select, button {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-    }
-    label {
-      margin-right: 1rem;
-    }
-    #results li {
-      background: white;
-      border: 1px solid #ccc;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-
-  <h2>キャラクターを選択</h2>
-  <select id="company" onchange="checkForm()">
-    <option value="">--選択--</option>
-  </select>
-
-  <h2>色を選択（0〜2つ）</h2>
-  <div id="colors">
-    <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
-    <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
-    <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
-    <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
-    <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
-  </div>
-
-  <p id="error-message" style="color:red;"></p>
-  <button id="search-btn" onclick="search()" disabled>検索</button>
-
-  <ul id="results"></ul>
-
 <script>
 const gasUrl = 'https://script.google.com/macros/s/AKfycbyH3vZTg7TtYaU8VR_L4s0eE6dtws0OiwzczELhoEIGarMBtfe3eLNEYYBerrDSRx5k/exec'; // ← あなたのGAS URLに置き換えてください
 
+let allData = []; // 初回取得した全データを格納
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const res = await fetch(`${gasUrl}?mode=companies`);
-  const companies = await res.json();
+  // キャラクター一覧取得
+  const resCompany = await fetch(`${gasUrl}?mode=companies`);
+  const companies = await resCompany.json();
   const select = document.getElementById('company');
   companies.forEach(c => {
     const opt = document.createElement('option');
@@ -60,6 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     opt.textContent = c;
     select.appendChild(opt);
   });
+
+  // 全コスチュームデータ取得
+  const resAll = await fetch(`${gasUrl}?mode=all`);
+  allData = await resAll.json();
 });
 
 function limitColors() {
@@ -82,25 +40,28 @@ function limitColors() {
 
 function checkForm() { limitColors(); }
 
-async function search() {
+function search() {
   const company = document.getElementById('company').value;
-  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value);
-  const params = new URLSearchParams();
-  params.append('company', company);
-  colors.forEach(c => params.append('colors', c));
-
-  const res = await fetch(`${gasUrl}?` + params.toString());
-  const data = await res.json();
+  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value.toLowerCase());
 
   const list = document.getElementById('results');
   list.innerHTML = '';
 
-  if (data.length === 0) {
+  const filtered = allData.filter(item => {
+    const charMatch = item.character === company;
+    const mainColor = item.main_color.toLowerCase();
+    const subColor = item.sub_color.toLowerCase();
+    const colorMatch = colors.length === 0
+      || colors.some(c => c === mainColor || c === subColor);
+    return charMatch && colorMatch;
+  });
+
+  if (filtered.length === 0) {
     list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
     return;
   }
 
-  data.forEach(item => {
+  filtered.forEach(item => {
     const li = document.createElement('li');
     li.innerHTML = `
       <strong>コスチューム：${item.costume}</strong><br>
@@ -112,5 +73,3 @@ async function search() {
   });
 }
 </script>
-</body>
-</html>
