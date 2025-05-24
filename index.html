@@ -1,12 +1,60 @@
-<script>
-const gasUrl = https://script.google.com/macros/s/AKfycbySxpfLacTAPtY8VjWRrfN5kSRz7zWbnADtTID5yHDdEOrYUFk-WAkYgAG2c4BbXasD/exec'; // ← あなたのGAS URLに置き換えてください
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ヒロアカURコスチューム検索</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+    }
+    select, button {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+    label {
+      margin-right: 1rem;
+    }
+    #results li {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
 
-let allData = []; // 初回取得した全データを格納
+  <h2>キャラクターを選択</h2>
+  <select id="company" onchange="checkForm()">
+    <option value="">--選択--</option>
+  </select>
+
+  <h2>色を選択（0〜2つ）</h2>
+  <div id="colors">
+    <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
+    <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
+    <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
+    <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
+    <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
+  </div>
+
+  <p id="error-message" style="color:red;"></p>
+  <button id="search-btn" onclick="search()" disabled>検索</button>
+
+  <p id="loading-msg" style="color: gray;"></p>
+  <p id="results-count" style="font-weight: bold;"></p>
+  <ul id="results"></ul>
+
+<script>
+const gasUrl = 'https://script.google.com/macros/s/AKfycbyH3vZTg7TtYaU8VR_L4s0eE6dtws0OiwzczELhoEIGarMBtfe3eLNEYYBerrDSRx5k/exec'; // ← あなたのGAS URLに置き換えてください
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // キャラクター一覧取得
-  const resCompany = await fetch(`${gasUrl}?mode=companies`);
-  const companies = await resCompany.json();
+  const res = await fetch(`${gasUrl}?mode=companies`);
+  const companies = await res.json();
   const select = document.getElementById('company');
   companies.forEach(c => {
     const opt = document.createElement('option');
@@ -14,10 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     opt.textContent = c;
     select.appendChild(opt);
   });
-
-  // 全コスチュームデータ取得
-  const resAll = await fetch(`${gasUrl}?mode=all`);
-  allData = await resAll.json();
 });
 
 function limitColors() {
@@ -38,38 +82,51 @@ function limitColors() {
   checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
 }
 
-function checkForm() { limitColors(); }
+function checkForm() {
+  limitColors();
+}
 
-function search() {
+async function search() {
   const company = document.getElementById('company').value;
-  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value.toLowerCase());
+  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value);
+  const params = new URLSearchParams();
+  params.append('company', company);
+  colors.forEach(c => params.append('colors', c));
 
+  const loadingMsg = document.getElementById('loading-msg');
+  const resultsCount = document.getElementById('results-count');
   const list = document.getElementById('results');
+
+  loadingMsg.textContent = '検索中...';
+  resultsCount.textContent = '';
   list.innerHTML = '';
 
-  const filtered = allData.filter(item => {
-    const charMatch = item.character === company;
-    const mainColor = item.main_color.toLowerCase();
-    const subColor = item.sub_color.toLowerCase();
-    const colorMatch = colors.length === 0
-      || colors.some(c => c === mainColor || c === subColor);
-    return charMatch && colorMatch;
-  });
+  try {
+    const res = await fetch(`${gasUrl}?` + params.toString());
+    const data = await res.json();
 
-  if (filtered.length === 0) {
-    list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
-    return;
+    if (data.length === 0) {
+      list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+    } else {
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>コスチューム：${item.costume}</strong><br>
+          キャラクター：${item.character}<br>
+          メイン色：${item.main_color}／サブ色：${item.sub_color}<br>
+          ${item.details.map((d, i) => `スロット${i+1}：${d}`).join('<br>')}
+        `;
+        list.appendChild(li);
+      });
+      resultsCount.textContent = `該当件数：${data.length}件`;
+    }
+  } catch (err) {
+    list.innerHTML = '<li>検索中にエラーが発生しました。</li>';
+    console.error(err);
+  } finally {
+    loadingMsg.textContent = '';
   }
-
-  filtered.forEach(item => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <strong>コスチューム：${item.costume}</strong><br>
-      キャラクター：${item.character}<br>
-      メイン色：${item.main_color}／サブ色：${item.sub_color}<br>
-      ${item.details.map((d, i) => `スロット${i+1}：${d}`).join('<br>')}
-    `;
-    list.appendChild(li);
-  });
 }
 </script>
+</body>
+</html>
