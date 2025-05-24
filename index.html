@@ -24,22 +24,35 @@
       margin-bottom: 1rem;
       border-radius: 8px;
     }
-    #loading {
+    .slot-box {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 4px;
+      font-weight: bold;
+      font-family: monospace;
+      margin-right: 0.25rem;
+      user-select: none;
+      color: #000;
+    }
+    .loading-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255, 255, 255, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.5rem;
-      z-index: 9999;
-      display: none;
+      font-weight: bold;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
 
-  <div id="loading">読み込み中…しばらくお待ちください</div>
+  <div id="loading" class="loading-overlay">読み込み中…</div>
 
   <h2>キャラクターを選択</h2>
   <select id="company" onchange="checkForm()" disabled>
@@ -48,62 +61,73 @@
 
   <h2>色を選択（0〜2つ）</h2>
   <div id="colors">
-    <label><input type="checkbox" value="赤" onchange="limitColors()" disabled> 赤</label>
-    <label><input type="checkbox" value="青" onchange="limitColors()" disabled> 青</label>
-    <label><input type="checkbox" value="黄" onchange="limitColors()" disabled> 黄</label>
-    <label><input type="checkbox" value="緑" onchange="limitColors()" disabled> 緑</label>
-    <label><input type="checkbox" value="紫" onchange="limitColors()" disabled> 紫</label>
+    <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
+    <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
+    <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
+    <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
+    <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
   </div>
 
   <p id="error-message" style="color:red;"></p>
   <button id="search-btn" onclick="search()" disabled>検索</button>
 
-  <p id="count"></p>
+  <p id="result-count"></p>
   <ul id="results"></ul>
 
 <script>
 const gasUrl = 'https://script.google.com/macros/s/AKfycbyH3vZTg7TtYaU8VR_L4s0eE6dtws0OiwzczELhoEIGarMBtfe3eLNEYYBerrDSRx5k/exec';
 
-const loadingEl = document.getElementById('loading');
-const companySelect = document.getElementById('company');
-const colorCheckboxes = document.querySelectorAll('#colors input[type="checkbox"]');
-const searchBtn = document.getElementById('search-btn');
-const errorMessage = document.getElementById('error-message');
-const countEl = document.getElementById('count');
+function createSpecialSlotBox(text) {
+  if (!text) return '';
+  const colorMap = {
+    '赤': '#f44336',
+    '黄': '#ffeb3b',
+    '緑': '#4caf50',
+    '青': '#2196f3',
+    '紫': '#9c27b0'
+  };
+  const match = text.match(/^([赤黄緑青紫])(H|V)$/);
+  if (!match) return text;
+  const [, color, char] = match;
+  const bgColor = colorMap[color] || '#ccc';
+  return `<span class="slot-box" style="background-color:${bgColor};">${char}</span>`;
+}
 
-async function loadCharacters() {
-  loadingEl.style.display = 'flex';
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch(`${gasUrl}?mode=companies`);
     const companies = await res.json();
+    const select = document.getElementById('company');
     companies.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c;
       opt.textContent = c;
-      companySelect.appendChild(opt);
+      select.appendChild(opt);
     });
-  } catch(e) {
-    errorMessage.textContent = 'キャラクター読み込みに失敗しました。再読み込みしてください。';
+    select.disabled = false;
+  } catch (e) {
+    alert('キャラクター一覧の取得に失敗しました。');
   } finally {
-    loadingEl.style.display = 'none';
-    companySelect.disabled = false;
-    colorCheckboxes.forEach(cb => cb.disabled = false);
+    document.getElementById('loading').style.display = 'none';
   }
-}
+});
 
 function limitColors() {
-  const checked = Array.from(colorCheckboxes).filter(cb => cb.checked);
-  const hasCompany = companySelect.value !== "";
+  const checkboxes = document.querySelectorAll('#colors input[type="checkbox"]');
+  const checked = Array.from(checkboxes).filter(cb => cb.checked);
+  const btn = document.getElementById('search-btn');
+  const error = document.getElementById('error-message');
+  const hasCompany = document.getElementById('company').value !== "";
 
   if (!hasCompany || checked.length > 2) {
-    errorMessage.textContent = 'キャラクターを選び、色は最大2つまでにしてください';
-    searchBtn.disabled = true;
+    error.textContent = 'キャラクターを選び、色は最大2つまでにしてください';
+    btn.disabled = true;
   } else {
-    errorMessage.textContent = '';
-    searchBtn.disabled = false;
+    error.textContent = '';
+    btn.disabled = false;
   }
 
-  colorCheckboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
+  checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
 }
 
 function checkForm() {
@@ -111,62 +135,59 @@ function checkForm() {
 }
 
 async function search() {
-  const company = companySelect.value;
-  const colors = Array.from(colorCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-
-  loadingEl.style.display = 'flex';
-  countEl.textContent = '';
-  errorMessage.textContent = '';
-  searchBtn.disabled = true;
-
+  const company = document.getElementById('company').value;
+  const colors = Array.from(document.querySelectorAll('#colors input[type="checkbox"]:checked')).map(cb => cb.value);
   const params = new URLSearchParams();
   params.append('company', company);
   colors.forEach(c => params.append('colors', c));
+
+  const btn = document.getElementById('search-btn');
+  btn.disabled = true;
+  document.getElementById('result-count').textContent = '検索中…';
+  document.getElementById('results').innerHTML = '';
 
   try {
     const res = await fetch(`${gasUrl}?` + params.toString());
     const data = await res.json();
 
-    const list = document.getElementById('results');
-    list.innerHTML = '';
-
     if (data.length === 0) {
-      list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
-      countEl.textContent = '取得レコード数：0件';
+      document.getElementById('results').innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+      document.getElementById('result-count').textContent = '取得件数: 0';
       return;
     }
 
-    countEl.textContent = `取得レコード数：${data.length}件`;
+    document.getElementById('result-count').textContent = `取得件数: ${data.length}`;
+
+    const list = document.getElementById('results');
+    list.innerHTML = '';
 
     data.forEach(item => {
+      // メイン色・サブ色はスペシャルチューニングスキル1,2として四角で表示
+      const mainColorBox = createSpecialSlotBox(item.main_color);
+      const subColorBox = createSpecialSlotBox(item.sub_color);
+
+      // チューニングスキル1〜10はテキスト表示
+      const tuningSkills1to5 = item.details.slice(0, 5).map((val, i) => `  ${i + 1}：${val}`).join('<br>');
+      const tuningSkills6to10 = item.details.slice(5, 10).map((val, i) => `  ${i + 6}：${val}`).join('<br>');
+
       const li = document.createElement('li');
       li.innerHTML = `
         <strong>コスチューム：${item.costume}</strong><br>
         キャラクター：${item.character}<br>
-        スペシャルチューニングスキル１：${item.main_color}<br>
-        スペシャルチューニングスキル２：${item.sub_color}<br>
-        <div style="display:flex; gap:2rem;">
-          <div>
-            <strong>チューニングスキル 1～5</strong><br>
-            ${item.details.slice(0,5).map((d,i) => `スロット${i+1}：${d}`).join('<br>')}
-          </div>
-          <div>
-            <strong>チューニングスキル 6～10</strong><br>
-            ${item.details.slice(5,10).map((d,i) => `スロット${i+6}：${d}`).join('<br>')}
-          </div>
-        </div>
+        スペシャルチューニングスキル1：${mainColorBox}
+        スペシャルチューニングスキル2：${subColorBox}<br><br>
+        <strong>チューニングスキル</strong><br>
+        ${tuningSkills1to5}<br><br>
+        ${tuningSkills6to10}
       `;
       list.appendChild(li);
     });
-  } catch(e) {
-    errorMessage.textContent = '検索中にエラーが発生しました。';
+  } catch (e) {
+    alert('検索中にエラーが発生しました。');
   } finally {
-    loadingEl.style.display = 'none';
-    searchBtn.disabled = false;
+    btn.disabled = false;
   }
 }
-
-document.addEventListener('DOMContentLoaded', loadCharacters);
 </script>
 </body>
 </html>
