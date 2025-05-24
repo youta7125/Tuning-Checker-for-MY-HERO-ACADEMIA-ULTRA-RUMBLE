@@ -109,15 +109,28 @@ async function search() {
       list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
     } else {
       data.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <strong>コスチューム：${item.costume}</strong><br>
-          キャラクター：${item.character}<br>
-          メイン色：${item.main_color}／サブ色：${item.sub_color}<br>
-          ${item.details.map((d, i) => `スロット${i+1}：${d}`).join('<br>')}
-        `;
-        list.appendChild(li);
-      });
+  const li = document.createElement('li');
+  const leftSlots = item.details.slice(0, 5).map((d, i) => `<tr><td>スロット${i+1}</td><td>${d}</td></tr>`).join('');
+  const rightSlots = item.details.slice(5, 10).map((d, i) => `<tr><td>スロット${i+6}</td><td>${d}</td></tr>`).join('');
+
+  li.innerHTML = `
+    <strong>コスチューム：${item.costume}</strong><br>
+    キャラクター：${item.character}<br>
+    メイン色：${item.main_color}／サブ色：${item.sub_color}<br>
+    <table>
+      <tr>
+        <td>
+          <table>${leftSlots}</table>
+        </td>
+        <td style="padding-left: 2rem;">
+          <table>${rightSlots}</table>
+        </td>
+      </tr>
+    </table>
+  `;
+  list.appendChild(li);
+});
+
       resultsCount.textContent = `該当件数：${data.length}件`;
     }
   } catch (err) {
