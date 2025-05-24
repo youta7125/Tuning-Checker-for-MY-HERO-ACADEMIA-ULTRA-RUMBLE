@@ -24,11 +24,24 @@
       margin-bottom: 1rem;
       border-radius: 8px;
     }
+    .loading {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      z-index: 999;
+    }
+    .slot-row {
+      margin-bottom: 0.5rem;
+    }
     .slot-box {
       display: inline-block;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
       text-align: center;
       border-radius: 4px;
       font-weight: bold;
@@ -36,81 +49,60 @@
       margin-right: 0.25rem;
       user-select: none;
       color: #000;
+      font-size: 18px;
+      background-color: #fff; /* 中は白 */
+      box-sizing: border-box;
     }
-    .loading-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      z-index: 1000;
-    }
+    /* 枠線を色ごとに設定 */
+    .color-赤 { border: 2px solid #ff4d4d; }
+    .color-青 { border: 2px solid #4d79ff; }
+    .color-黄 { border: 2px solid #ffdb4d; }
+    .color-緑 { border: 2px solid #4dff4d; }
+    .color-紫 { border: 2px solid #a64dff; }
   </style>
 </head>
 <body>
 
-  <div id="loading" class="loading-overlay">読み込み中…</div>
+<div id="loading" class="loading">読み込み中...</div>
 
-  <h2>キャラクターを選択</h2>
-  <select id="company" onchange="checkForm()" disabled>
-    <option value="">--選択--</option>
-  </select>
+<h2>キャラクターを選択</h2>
+<select id="company" onchange="checkForm()" disabled>
+  <option value="">--選択--</option>
+</select>
 
-  <h2>色を選択（0〜2つ）</h2>
-  <div id="colors">
-    <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
-    <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
-    <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
-    <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
-    <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
-  </div>
+<h2>色を選択（0〜2つ）</h2>
+<div id="colors">
+  <label><input type="checkbox" value="赤" onchange="limitColors()"> 赤</label>
+  <label><input type="checkbox" value="青" onchange="limitColors()"> 青</label>
+  <label><input type="checkbox" value="黄" onchange="limitColors()"> 黄</label>
+  <label><input type="checkbox" value="緑" onchange="limitColors()"> 緑</label>
+  <label><input type="checkbox" value="紫" onchange="limitColors()"> 紫</label>
+</div>
 
-  <p id="error-message" style="color:red;"></p>
-  <button id="search-btn" onclick="search()" disabled>検索</button>
+<p id="error-message" style="color:red;"></p>
+<button id="search-btn" onclick="search()" disabled>検索</button>
 
-  <p id="result-count"></p>
-  <ul id="results"></ul>
+<p id="result-count"></p>
+<ul id="results"></ul>
 
 <script>
 const gasUrl = 'https://script.google.com/macros/s/AKfycbyH3vZTg7TtYaU8VR_L4s0eE6dtws0OiwzczELhoEIGarMBtfe3eLNEYYBerrDSRx5k/exec';
 
-function createSpecialSlotBox(text) {
-  if (!text) return '';
-  const colorMap = {
-    '赤': '#f44336',
-    '黄': '#ffeb3b',
-    '緑': '#4caf50',
-    '青': '#2196f3',
-    '紫': '#9c27b0'
-  };
-  const match = text.match(/^([赤黄緑青紫])(H|V)$/);
-  if (!match) return text;
-  const [, color, char] = match;
-  const bgColor = colorMap[color] || '#ccc';
-  return `<span class="slot-box" style="background-color:${bgColor};">${char}</span>`;
+async function loadCharacters() {
+  const res = await fetch(`${gasUrl}?mode=companies`);
+  const characters = await res.json();
+  const select = document.getElementById('company');
+  characters.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+  select.disabled = false;
+  document.getElementById('loading').style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const res = await fetch(`${gasUrl}?mode=companies`);
-    const companies = await res.json();
-    const select = document.getElementById('company');
-    companies.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c;
-      opt.textContent = c;
-      select.appendChild(opt);
-    });
-    select.disabled = false;
-  } catch (e) {
-    alert('キャラクター一覧の取得に失敗しました。');
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-  }
-});
+document.addEventListener('DOMContentLoaded', loadCharacters);
 
 function limitColors() {
   const checkboxes = document.querySelectorAll('#colors input[type="checkbox"]');
@@ -130,8 +122,15 @@ function limitColors() {
   checkboxes.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
 }
 
-function checkForm() {
-  limitColors();
+function checkForm() { limitColors(); }
+
+function createSlotBox(text) {
+  if (!text) text = ''; // 空文字は空白扱い
+  const colorMatch = text.match(/(赤|青|黄|緑|紫)/);
+  const hvMatch = text.match(/[HV]/i);
+  const colorClass = colorMatch ? `color-${colorMatch[1]}` : '';
+  const hvText = hvMatch ? hvMatch[0].toUpperCase() : '';
+  return `<span class="slot-box ${colorClass}">${hvText}</span>`;
 }
 
 async function search() {
@@ -142,52 +141,46 @@ async function search() {
   colors.forEach(c => params.append('colors', c));
 
   const btn = document.getElementById('search-btn');
+  const list = document.getElementById('results');
+  const resultCount = document.getElementById('result-count');
+
   btn.disabled = true;
-  document.getElementById('result-count').textContent = '検索中…';
-  document.getElementById('results').innerHTML = '';
+  list.innerHTML = '';
+  resultCount.textContent = '検索中...';
 
-  try {
-    const res = await fetch(`${gasUrl}?` + params.toString());
-    const data = await res.json();
+  const res = await fetch(`${gasUrl}?` + params.toString());
+  const data = await res.json();
 
-    if (data.length === 0) {
-      document.getElementById('results').innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
-      document.getElementById('result-count').textContent = '取得件数: 0';
-      return;
-    }
+  btn.disabled = false;
+  resultCount.textContent = `${data.length} 件のコスチュームが見つかりました`;
 
-    document.getElementById('result-count').textContent = `取得件数: ${data.length}`;
-
-    const list = document.getElementById('results');
-    list.innerHTML = '';
-
-    data.forEach(item => {
-      // メイン色・サブ色はスペシャルチューニングスキル1,2として四角で表示
-      const mainColorBox = createSpecialSlotBox(item.main_color);
-      const subColorBox = createSpecialSlotBox(item.sub_color);
-
-      // チューニングスキル1〜10はテキスト表示
-      const tuningSkills1to5 = item.details.slice(0, 5).map((val, i) => `  ${i + 1}：${val}`).join('<br>');
-      const tuningSkills6to10 = item.details.slice(5, 10).map((val, i) => `  ${i + 6}：${val}`).join('<br>');
-
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <strong>コスチューム：${item.costume}</strong><br>
-        キャラクター：${item.character}<br>
-        スペシャルチューニングスキル1：${mainColorBox}
-        スペシャルチューニングスキル2：${subColorBox}<br><br>
-        <strong>チューニングスキル</strong><br>
-        ${tuningSkills1to5}<br><br>
-        ${tuningSkills6to10}
-      `;
-      list.appendChild(li);
-    });
-  } catch (e) {
-    alert('検索中にエラーが発生しました。');
-  } finally {
-    btn.disabled = false;
+  if (data.length === 0) {
+    list.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+    return;
   }
+
+  data.forEach(item => {
+    const special1 = createSlotBox(item.main_color);
+    const special2 = createSlotBox(item.sub_color);
+
+    const tuningSkillsLeft = item.details.slice(0,5).map(createSlotBox).join('');
+    const tuningSkillsRight = item.details.slice(5,10).map(createSlotBox).join('');
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <strong>コスチューム：${item.costume}</strong><br>
+      キャラクター：${item.character}<br>
+      <div>スペシャルチューニングスキル：</div>
+      <div>${special1}${special2}</div>
+      <div>チューニングスキル 1～5：</div>
+      <div class="slot-row">${tuningSkillsLeft}</div>
+      <div>チューニングスキル 6～10：</div>
+      <div class="slot-row">${tuningSkillsRight}</div>
+    `;
+    list.appendChild(li);
+  });
 }
 </script>
+
 </body>
 </html>
