@@ -12,86 +12,119 @@
   }
   
   body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+    background: #0a1428;
+    color: #ffffff;
     min-height: 100vh;
-    padding: 1rem;
+    line-height: 1.6;
+  }
+  
+  /* ヒーローらしい背景パターン */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(46, 204, 113, 0.05) 0%, transparent 50%);
+    z-index: -1;
   }
   
   .container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    animation: slideUp 0.8s ease-out;
-  }
-  
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .header {
-    background: linear-gradient(135deg, #ff6b6b, #feca57);
     padding: 2rem;
+  }
+  
+  /* ヘッダー部分 */
+  .header {
     text-align: center;
-    color: white;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+    border-radius: 2px;
   }
   
   .header h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     margin-bottom: 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
   }
   
-  .header p {
-    opacity: 0.9;
-    font-size: 1.1rem;
+  .header .subtitle {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    font-weight: 300;
   }
   
+  /* フォーム部分 */
   .form-section {
-    padding: 2rem;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
   
   .form-group {
     margin-bottom: 2rem;
   }
   
-  .form-group h3 {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .form-group:last-child {
+    margin-bottom: 0;
   }
   
-  .form-group h3::before {
-    content: '✨';
-    font-size: 1.2rem;
+  .form-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .form-label::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-size: 0.8rem;
   }
   
   select {
     width: 100%;
-    padding: 1rem;
-    border: 2px solid #e1e8ed;
-    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    background: rgba(30, 41, 59, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #ffffff;
     font-size: 1rem;
-    background: white;
+    font-weight: 500;
     transition: all 0.3s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 1rem center;
     background-repeat: no-repeat;
     background-size: 1rem;
@@ -100,13 +133,13 @@
   
   select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background-color: rgba(30, 41, 59, 1);
   }
   
   select:hover {
-    border-color: #667eea;
+    border-color: rgba(255, 255, 255, 0.3);
   }
   
   .sp-group {
@@ -115,121 +148,157 @@
     gap: 1rem;
   }
   
-  @media (max-width: 600px) {
+  .sp-label {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  @media (max-width: 768px) {
     .sp-group {
       grid-template-columns: 1fr;
     }
+    
+    .header h1 {
+      font-size: 2rem;
+    }
+    
+    .container {
+      padding: 1rem;
+    }
+    
+    .form-section {
+      padding: 1.5rem;
+    }
   }
   
+  /* ボタンスタイル */
   .search-button {
     width: 100%;
     padding: 1.2rem 2rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    margin-top: 1rem;
   }
   
-  .search-button:disabled {
-    background: #cbd5e0;
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  .search-button:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-  }
-  
-  .search-button:not(:disabled):active {
-    transform: translateY(0);
-  }
-  
-  .slot-box {
-    display: inline-block;
-    width: 35px;
-    height: 35px;
-    border: 3px solid;
-    margin: 3px;
-    text-align: center;
-    line-height: 29px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .slot-box::before {
+  .search-button::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s ease;
   }
   
-  .slot-box:hover::before {
+  .search-button:hover::before {
     left: 100%;
   }
   
-  .red { 
-    border-color: #e74c3c; 
-    background: rgba(231, 76, 60, 0.1);
-  }
-  .blue { 
-    border-color: #3498db; 
-    background: rgba(52, 152, 219, 0.1);
-  }
-  .yellow { 
-    border-color: #f39c12; 
-    background: rgba(243, 156, 18, 0.1);
-  }
-  .green { 
-    border-color: #27ae60; 
-    background: rgba(39, 174, 96, 0.1);
-  }
-  .purple { 
-    border-color: #9b59b6; 
-    background: rgba(155, 89, 182, 0.1);
+  .search-button:disabled {
+    background: rgba(71, 85, 105, 0.5);
+    cursor: not-allowed;
+    transform: none;
   }
   
+  .search-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  }
+  
+  .search-button:not(:disabled):active {
+    transform: translateY(0);
+  }
+  
+  /* スロットボックス */
+  .slot-box {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid;
+    margin: 3px;
+    text-align: center;
+    line-height: 34px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .slot-box:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+  
+  .red { 
+    border-color: #ef4444; 
+    color: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+  }
+  .blue { 
+    border-color: #3b82f6; 
+    color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
+  .yellow { 
+    border-color: #eab308; 
+    color: #eab308;
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
+  }
+  .green { 
+    border-color: #22c55e; 
+    color: #22c55e;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+  }
+  .purple { 
+    border-color: #a855f7; 
+    color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  }
+  
+  /* メッセージ */
   .message {
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
     margin: 1rem 0;
     font-weight: 500;
+    border: 1px solid;
   }
   
   .error-message {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
-    border: 2px solid rgba(231, 76, 60, 0.2);
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
   }
   
   .loading-message {
-    background: rgba(52, 152, 219, 0.1);
-    color: #3498db;
-    border: 2px solid rgba(52, 152, 219, 0.2);
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.3);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
   }
   
   .loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(52, 152, 219, 0.3);
-    border-top: 2px solid #3498db;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(59, 130, 246, 0.3);
+    border-top: 3px solid #3b82f6;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -239,18 +308,20 @@
     100% { transform: rotate(360deg); }
   }
   
+  /* 結果表示 */
   .results-section {
-    padding: 0 2rem 2rem;
+    margin-top: 2rem;
   }
   
   .record-count {
-    background: rgba(39, 174, 96, 0.1);
-    color: #27ae60;
-    padding: 0.8rem 1rem;
-    border-radius: 8px;
-    margin: 1rem 0;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
     font-weight: 600;
     text-align: center;
+    border: 1px solid rgba(34, 197, 94, 0.3);
   }
   
   #results {
@@ -258,15 +329,15 @@
   }
   
   #results li {
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
   
   #results li::before {
@@ -276,18 +347,20 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 0 0 0 12px;
   }
   
   #results li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
   }
   
   .costume-title {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 1rem;
     padding-left: 1rem;
   }
@@ -295,33 +368,50 @@
   .costume-details {
     padding-left: 1rem;
     line-height: 1.8;
+    color: #e2e8f0;
+  }
+  
+  .detail-label {
+    color: #94a3b8;
+    font-weight: 600;
+    min-width: 140px;
+    display: inline-block;
+  }
+  
+  .skill-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .skill-row {
     display: flex;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.8rem;
+    flex-wrap: wrap;
   }
   
   .skill-column {
     flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
+    min-width: 200px;
   }
   
   .no-results {
     text-align: center;
-    padding: 3rem;
-    color: #7f8c8d;
-    font-size: 1.1rem;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+    font-size: 1.2rem;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .no-results::before {
     content: '🔍';
     display: block;
-    font-size: 3rem;
+    font-size: 4rem;
     margin-bottom: 1rem;
+    opacity: 0.5;
   }
 </style>
 </head>
@@ -329,15 +419,15 @@
 
 <div class="container">
   <div class="header">
-    <h1>🦸‍♂️ ヒロアカUR検索</h1>
-    <p>お気に入りのコスチュームを見つけよう</p>
+    <h1>ULTRA RUMBLE</h1>
+    <p class="subtitle">コスチューム検索システム</p>
   </div>
   
   <div class="form-section">
     <div class="form-group">
-      <h3>キャラクター選択</h3>
+      <label class="form-label">Character Selection</label>
       <select id="character" onchange="checkForm()">
-        <option value="">--キャラクターを選択してください--</option>
+        <option value="">キャラクターを選択してください</option>
         <option value="山田">山田</option>
         <option value="緑谷">緑谷</option>
         <option value="爆豪">爆豪</option>
@@ -345,35 +435,41 @@
     </div>
 
     <div class="form-group">
-      <h3>SPチューニング（最大2種類）</h3>
+      <label class="form-label">Special Tuning</label>
       <div class="sp-group">
-        <select id="sp1" onchange="checkForm()">
-          <option value="">--1つ目を選択--</option>
-          <option value="赤H">赤H</option><option value="赤V">赤V</option>
-          <option value="青H">青H</option><option value="青V">青V</option>
-          <option value="黄H">黄H</option><option value="黄V">黄V</option>
-          <option value="緑H">緑H</option><option value="緑V">緑V</option>
-          <option value="紫H">紫H</option><option value="紫V">紫V</option>
-        </select>
-        <select id="sp2" onchange="checkForm()">
-          <option value="">--2つ目を選択--</option>
-          <option value="赤H">赤H</option><option value="赤V">赤V</option>
-          <option value="青H">青H</option><option value="青V">青V</option>
-          <option value="黄H">黄H</option><option value="黄V">黄V</option>
-          <option value="緑H">緑H</option><option value="緑V">緑V</option>
-          <option value="紫H">紫H</option><option value="紫V">紫V</option>
-        </select>
+        <div>
+          <div class="sp-label">1st Tuning</div>
+          <select id="sp1" onchange="checkForm()">
+            <option value="">選択してください</option>
+            <option value="赤H">赤H</option><option value="赤V">赤V</option>
+            <option value="青H">青H</option><option value="青V">青V</option>
+            <option value="黄H">黄H</option><option value="黄V">黄V</option>
+            <option value="緑H">緑H</option><option value="緑V">緑V</option>
+            <option value="紫H">紫H</option><option value="紫V">紫V</option>
+          </select>
+        </div>
+        <div>
+          <div class="sp-label">2nd Tuning</div>
+          <select id="sp2" onchange="checkForm()">
+            <option value="">選択してください</option>
+            <option value="赤H">赤H</option><option value="赤V">赤V</option>
+            <option value="青H">青H</option><option value="青V">青V</option>
+            <option value="黄H">黄H</option><option value="黄V">黄V</option>
+            <option value="緑H">緑H</option><option value="緑V">緑V</option>
+            <option value="紫H">紫H</option><option value="紫V">紫V</option>
+          </select>
+        </div>
       </div>
     </div>
 
     <div id="error-message" class="message error-message" style="display:none;"></div>
     <div id="loading-message" class="message loading-message" style="display:none;">
       <div class="loading-spinner"></div>
-      <span>読み込み中です。お待ちください...</span>
+      <span>Loading...</span>
     </div>
 
     <button id="search-btn" class="search-button" onclick="search()" disabled>
-      🔍 検索開始
+      Search
     </button>
   </div>
   
@@ -390,7 +486,7 @@ let allData = [];
 document.addEventListener('DOMContentLoaded', async () => {
   const loadingMsg = document.getElementById('loading-message');
   loadingMsg.style.display = 'flex';
-  loadingMsg.querySelector('span').textContent = '初期データを読み込み中です...';
+  loadingMsg.querySelector('span').textContent = 'データを初期化中...';
 
   try {
     const res = await fetch(`${gasUrl}?mode=all`);
@@ -398,7 +494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log("全データ取得済", allData);
   } catch (e) {
     const errorMsg = document.getElementById('error-message');
-    errorMsg.textContent = 'データ取得に失敗しました';
+    errorMsg.textContent = 'データの取得に失敗しました。しばらく時間をおいてから再度お試しください。';
     errorMsg.style.display = 'block';
     console.error(e);
   }
@@ -414,7 +510,7 @@ function checkForm() {
   const valid = char && (sp1 || sp2);
   const btn = document.getElementById('search-btn');
   btn.disabled = !valid;
-  btn.textContent = valid ? '🔍 検索開始' : '⚠️ 条件を入力してください';
+  btn.textContent = valid ? 'Search' : 'Select Character & Tuning';
 }
 
 function colorClass(color) {
@@ -450,7 +546,7 @@ function search() {
   const resultsEl = document.getElementById('results');
   const recordCount = document.getElementById('record-count');
 
-  loadingMsg.querySelector('span').textContent = '検索中です。お待ちください...';
+  loadingMsg.querySelector('span').textContent = '検索実行中...';
   loadingMsg.style.display = 'flex';
   resultsEl.innerHTML = '';
   recordCount.style.display = 'none';
@@ -466,11 +562,11 @@ function search() {
     });
 
     resultsEl.innerHTML = '';
-    recordCount.textContent = `✨ 取得件数：${results.length}件`;
+    recordCount.textContent = `SEARCH RESULTS: ${results.length} COSTUMES FOUND`;
     recordCount.style.display = 'block';
 
     if (!results.length) {
-      resultsEl.innerHTML = '<li class="no-results">該当するコスチュームが見つかりませんでした</li>';
+      resultsEl.innerHTML = '<li class="no-results">条件に一致するコスチュームが見つかりませんでした<br>検索条件を変更してお試しください</li>';
     } else {
       results.forEach(item => {
         const li = document.createElement('li');
@@ -484,15 +580,17 @@ function search() {
         const right = tuningBoxes.slice(5).join('');
 
         li.innerHTML = `
-          <div class="costume-title">🎭 ${item.costume}</div>
+          <div class="costume-title">${item.costume}</div>
           <div class="costume-details">
-            <strong>👤 キャラクター：</strong>${item.character}<br>
-            <strong>⚡ SPチューニング：</strong><br>
-            <div style="margin: 0.5rem 0;">${sp1Box} ${sp2Box}</div>
-            <strong>🎯 チューニングスキル：</strong>
-            <div class="skill-row">
-              <div class="skill-column">${left}</div>
-              <div class="skill-column">${right}</div>
+            <div><span class="detail-label">Character:</span>${item.character}</div>
+            <div><span class="detail-label">SP Tuning:</span></div>
+            <div style="margin: 0.8rem 0;">${sp1Box} ${sp2Box}</div>
+            <div class="skill-section">
+              <div><span class="detail-label">Tuning Skills:</span></div>
+              <div class="skill-row">
+                <div class="skill-column">${left}</div>
+                <div class="skill-column">${right}</div>
+              </div>
             </div>
           </div>
         `;
@@ -501,7 +599,7 @@ function search() {
     }
 
     loadingMsg.style.display = 'none';
-  }, 300);
+  }, 400);
 }
 </script>
 </body>
