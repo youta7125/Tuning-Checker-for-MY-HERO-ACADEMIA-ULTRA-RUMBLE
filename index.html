@@ -4,373 +4,66 @@
 <meta charset="UTF-8">
 <title>ヒロアカURコスチューム検索</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    color: #ffffff;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 40px rgba(255, 193, 7, 0.1);
-    border: 2px solid #ffc107;
-  }
-
-  h1 {
-    text-align: center;
-    color: #ffc107;
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-    letter-spacing: 2px;
-  }
-
-  h2 {
-    color: #ffc107;
-    font-size: 1.4rem;
-    margin: 25px 0 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #ffc107;
-    display: inline-block;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .form-section {
-    background: rgba(255, 193, 7, 0.05);
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255, 193, 7, 0.2);
-  }
-
-  select, button { 
-    padding: 12px 16px;
-    margin: 8px 5px;
-    font-size: 1rem;
-    border: 2px solid #ffc107;
-    background: rgba(0, 0, 0, 0.7);
-    color: #ffffff;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    min-width: 150px;
-  }
-
-  select:hover, select:focus {
-    background: rgba(255, 193, 7, 0.1);
-    border-color: #ffeb3b;
-    outline: none;
-    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
-  }
-
-  select option {
-    background: #1a1a1a;
-    color: #ffffff;
-    padding: 10px;
-  }
-
-  button {
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    color: #000000;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    min-width: 120px;
-    transition: all 0.3s ease;
-  }
-
-  button:hover:not(:disabled) {
-    background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4);
-  }
-
-  button:disabled {
-    background: #666;
-    color: #999;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  .sp-selection {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .sp-selection label {
-    color: #ffc107;
-    font-weight: bold;
-    margin-right: 10px;
-  }
-
+  body { font-family: sans-serif; margin: 2rem; background: #f9f9f9; }
+  select, button { padding: .5rem; margin: .5rem 0; font-size: 1rem; }
+  label { margin-right: 1rem; }
   .slot-box {
-    display: inline-block; 
-    width: 35px; 
-    height: 35px; 
-    border: 2px solid;
-    margin: 3px; 
-    text-align: center; 
-    line-height: 31px;
-    font-size: 0.8rem; 
-    font-weight: bold;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    background: rgba(0, 0, 0, 0.5);
-    color: #ffffff;
+    display: inline-block; width: 30px; height: 30px; border: 2px solid;
+    margin: 2px; text-align: center; line-height: 30px;
+    font-size: .7rem; font-weight: bold;
   }
-
-  .slot-box:hover {
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-  }
-
-  .red { 
-    border-color: #f44336; 
-    box-shadow: 0 0 10px rgba(244, 67, 54, 0.3);
-  }
-  .blue { 
-    border-color: #2196f3; 
-    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
-  }
-  .yellow { 
-    border-color: #ffc107; 
-    box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
-  }
-  .green { 
-    border-color: #4caf50; 
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
-  }
-  .purple { 
-    border-color: #9c27b0; 
-    box-shadow: 0 0 10px rgba(156, 39, 176, 0.3);
-  }
-
-  #results {
-    list-style: none;
-  }
-
+  .red { border-color: red; }
+  .blue { border-color: blue; }
+  .yellow { border-color: gold; }
+  .green { border-color: green; }
+  .purple { border-color: purple; }
   #results li {
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
-    border: 2px solid rgba(255, 193, 7, 0.3);
-    padding: 25px;
-    margin-bottom: 20px;
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    background: #fff; border: 1px solid #ccc;
+    padding: 1rem; margin-bottom: 1rem; border-radius: 8px;
   }
-
-  #results li::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.1), transparent);
-    transition: left 0.5s ease;
-  }
-
-  #results li:hover {
-    border-color: #ffc107;
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(255, 193, 7, 0.2);
-  }
-
-  #results li:hover::before {
-    left: 100%;
-  }
-
-  .row { 
-    display: flex; 
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .column { 
-    flex: 1; 
-  }
-
+  .row { display: flex; }
+  .column { flex: 1; }
   #loading-message {
-    color: #ffc107;
+    color: blue;
     font-weight: bold;
-    margin: 20px 0;
-    text-align: center;
-    font-size: 1.1rem;
-    padding: 15px;
-    background: rgba(255, 193, 7, 0.1);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 193, 7, 0.3);
-  }
-
-  #error-message {
-    color: #f44336;
-    font-weight: bold;
-    margin: 15px 0;
-    text-align: center;
-    padding: 15px;
-    background: rgba(244, 67, 54, 0.1);
-    border-radius: 10px;
-    border: 1px solid rgba(244, 67, 54, 0.3);
-  }
-
-  #record-count {
-    color: #ffc107;
-    font-weight: bold;
-    margin: 20px 0;
-    text-align: center;
-    font-size: 1.1rem;
-    padding: 10px;
-    background: rgba(255, 193, 7, 0.1);
-    border-radius: 8px;
-  }
-
-  .costume-name {
-    color: #ffc107;
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
-  }
-
-  .info-label {
-    color: #ffeb3b;
-    font-weight: bold;
-    margin-right: 10px;
-  }
-
-  .info-value {
-    color: #ffffff;
-  }
-
-  .tuning-section {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 193, 7, 0.3);
-  }
-
-  /* レスポンシブ対応 */
-  @media (max-width: 768px) {
-    .container {
-      padding: 20px;
-      margin: 10px;
-    }
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    .sp-selection {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    select, button {
-      width: 100%;
-      margin: 5px 0;
-    }
-
-    .row {
-      flex-direction: column;
-    }
-  }
-
-  /* アニメーション */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .form-section, #results li {
-    animation: fadeIn 0.5s ease-out;
-  }
-
-  /* スクロールバーのカスタマイズ */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #1a1a1a;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #ffc107;
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #ffeb3b;
+    margin-bottom: 1rem;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>⚡ ヒーローアカデミア ⚡<br>URコスチューム検索</h1>
+<h2>キャラクターを選択</h2>
+<select id="character" onchange="checkForm()">
+  <option value="">--選択--</option>
+  <option value="山田">山田</option>
+  <option value="緑谷">緑谷</option>
+  <option value="爆豪">爆豪</option>
+</select>
 
-  <div class="form-section">
-    <h2>🦸 キャラクター選択</h2>
-    <select id="character" onchange="checkForm()">
-      <option value="">--キャラクターを選択--</option>
-      <option value="山田">山田</option>
-      <option value="緑谷">緑谷</option>
-      <option value="爆豪">爆豪</option>
-    </select>
-  </div>
+<h2>SPチューニング（最大2種類）</h2>
+<select id="sp1" onchange="checkForm()">
+  <option value="">--未選択--</option>
+  <option value="赤H">赤H</option><option value="赤V">赤V</option>
+  <option value="青H">青H</option><option value="青V">青V</option>
+  <option value="黄H">黄H</option><option value="黄V">黄V</option>
+  <option value="緑H">緑H</option><option value="緑V">緑V</option>
+  <option value="紫H">紫H</option><option value="紫V">紫V</option>
+</select>
+<select id="sp2" onchange="checkForm()">
+  <option value="">--未選択--</option>
+  <option value="赤H">赤H</option><option value="赤V">赤V</option>
+  <option value="青H">青H</option><option value="青V">青V</option>
+  <option value="黄H">黄H</option><option value="黄V">黄V</option>
+  <option value="緑H">緑H</option><option value="緑V">緑V</option>
+  <option value="紫H">紫H</option><option value="紫V">紫V</option>
+</select>
 
-  <div class="form-section">
-    <h2>✨ SPチューニング（最大2種類）</h2>
-    <div class="sp-selection">
-      <label>1つ目:</label>
-      <select id="sp1" onchange="checkForm()">
-        <option value="">--未選択--</option>
-        <option value="赤H">赤H</option><option value="赤V">赤V</option>
-        <option value="青H">青H</option><option value="青V">青V</option>
-        <option value="黄H">黄H</option><option value="黄V">黄V</option>
-        <option value="緑H">緑H</option><option value="緑V">緑V</option>
-        <option value="紫H">紫H</option><option value="紫V">紫V</option>
-      </select>
-      
-      <label>2つ目:</label>
-      <select id="sp2" onchange="checkForm()">
-        <option value="">--未選択--</option>
-        <option value="赤H">赤H</option><option value="赤V">赤V</option>
-        <option value="青H">青H</option><option value="青V">青V</option>
-        <option value="黄H">黄H</option><option value="黄V">黄V</option>
-        <option value="緑H">緑H</option><option value="緑V">緑V</option>
-        <option value="紫H">紫H</option><option value="紫V">紫V</option>
-      </select>
-    </div>
-  </div>
+<p id="error-message" style="color:red;"></p>
+<p id="loading-message" style="display:none;">読み込み中です。お待ちください...</p>
 
-  <p id="error-message" style="display:none;"></p>
-  <p id="loading-message" style="display:none;">読み込み中です。お待ちください...</p>
-
-  <div style="text-align: center; margin: 30px 0;">
-    <button id="search-btn" onclick="search()" disabled>🔍 検索開始</button>
-  </div>
-
-  <p id="record-count"></p>
-  <ul id="results"></ul>
-</div>
+<button id="search-btn" onclick="search()" disabled>検索</button>
+<p id="record-count"></p>
+<ul id="results"></ul>
 
 <script>
 const gasUrl = 'https://script.google.com/macros/s/AKfycbxbuI0V38GseqRQ0wdzD2a2_Eo8RTW0OyECCicFZ6u4IXGTTeUwLEtSjQYY9xneBkH_/exec';  // ← 必ず差し替え
@@ -379,16 +72,14 @@ let allData = [];
 document.addEventListener('DOMContentLoaded', async () => {
   const loadingMsg = document.getElementById('loading-message');
   loadingMsg.style.display = 'block';
-  loadingMsg.textContent = '⚡ 初期データを読み込み中です...';
+  loadingMsg.textContent = '初期データを読み込み中です...';
 
   try {
     const res = await fetch(`${gasUrl}?mode=all`);
     allData = await res.json();
     console.log("全データ取得済", allData);
   } catch (e) {
-    const errorMsg = document.getElementById('error-message');
-    errorMsg.textContent = '❌ データ取得に失敗しました';
-    errorMsg.style.display = 'block';
+    document.getElementById('error-message').textContent = 'データ取得に失敗しました';
     console.error(e);
   }
 
@@ -438,7 +129,7 @@ function search() {
   const recordCount = document.getElementById('record-count');
 
   // ローディング表示ON
-  loadingMsg.textContent = '🔍 検索中です。お待ちください...';
+  loadingMsg.textContent = '検索中です。お待ちください...';
   loadingMsg.style.display = 'block';
   resultsEl.innerHTML = '';
   recordCount.textContent = '';
@@ -454,10 +145,10 @@ function search() {
     });
 
     resultsEl.innerHTML = '';
-    recordCount.textContent = `📊 取得件数：${results.length}件`;
+    recordCount.textContent = `取得件数：${results.length}`;
 
     if (!results.length) {
-      resultsEl.innerHTML = '<li style="text-align: center; color: #ff9800;">❌ 該当するコスチュームが見つかりませんでした。</li>';
+      resultsEl.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
     } else {
       results.forEach(item => {
         const li = document.createElement('li');
@@ -471,21 +162,13 @@ function search() {
         const right = tuningBoxes.slice(5).join('');
 
         li.innerHTML = `
-          <div class="costume-name">🦸 コスチューム：${item.costume}</div>
-          <div style="margin-bottom: 10px;">
-            <span class="info-label">👤 キャラクター：</span>
-            <span class="info-value">${item.character}</span>
-          </div>
-          <div style="margin-bottom: 10px;">
-            <span class="info-label">✨ スペシャルチューニング：</span><br>
-            <div style="margin-top: 8px;">${sp1Box} ${sp2Box}</div>
-          </div>
-          <div class="tuning-section">
-            <span class="info-label">⚙️ チューニングスキル：</span>
-            <div class="row">
-              <div class="column">${left}</div>
-              <div class="column">${right}</div>
-            </div>
+          <strong>コスチューム：${item.costume}</strong><br>
+          キャラクター：${item.character}<br>
+          スペシャルチューニング：<br>${sp1Box} ${sp2Box}<br>
+          チューニングスキル：
+          <div class="row">
+            <div class="column">${left}</div>
+            <div class="column">${right}</div>
           </div>
         `;
         resultsEl.appendChild(li);
