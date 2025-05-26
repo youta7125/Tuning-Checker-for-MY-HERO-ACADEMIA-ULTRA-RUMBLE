@@ -1,160 +1,132 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ヒロアカURコスチューム検索</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
-    }
-    select, button {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-    }
-    label {
-      margin-right: 1rem;
-    }
-    .slot-box {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border: 2px solid;
-      margin: 2px;
-      text-align: center;
-      line-height: 30px;
-      font-size: 0.7rem;
-      font-weight: bold;
-    }
-    .red { border-color: red; }
-    .blue { border-color: blue; }
-    .yellow { border-color: gold; }
-    .green { border-color: green; }
-    .purple { border-color: purple; }
-    #results li {
-      background: white;
-      border: 1px solid #ccc;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-    }
-    .row {
-      display: flex;
-    }
-    .column {
-      flex: 1;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>ヒロアカURコスチューム検索</title>
+<style>
+  body{font-family:sans-serif;margin:2rem;background:#f9f9f9}
+  select,button{padding:.5rem;margin:.5rem 0;font-size:1rem}
+  label{margin-right:1rem}
+  .slot-box{display:inline-block;width:30px;height:30px;border:2px solid;margin:2px;text-align:center;line-height:30px;font-size:.7rem;font-weight:bold}
+  .red{border-color:red}.blue{border-color:blue}.yellow{border-color:gold}.green{border-color:green}.purple{border-color:purple}
+  #results li{background:#fff;border:1px solid #ccc;padding:1rem;margin-bottom:1rem;border-radius:8px}
+  .row{display:flex}.column{flex:1}
+</style>
 </head>
 <body>
-  <h2>キャラクターを選択</h2>
-  <select id="company" onchange="checkForm()">
-    <option value="">--選択--</option>
-  </select>
+<h2>キャラクターを選択</h2>
+<select id="company" onchange="checkForm()">
+  <option value="">--選択--</option>
+</select>
 
-  <h2>スペシャルチューニングスキル（最大10枠）</h2>
-  <div id="special-tunings"></div>
+<h2>スペシャルチューニングスキル（最大10枠）</h2>
+<div id="special-tunings"></div>
 
-  <p id="error-message" style="color:red;"></p>
-  <button id="search-btn" onclick="search()" disabled>検索</button>
-  <p id="record-count"></p>
-  <ul id="results"></ul>
+<p id="error-message" style="color:red;"></p>
+<button id="search-btn" onclick="search()" disabled>検索</button>
+<p id="record-count"></p>
+<ul id="results"></ul>
 
 <script>
-const gasUrl = 'YOUR_GAS_URL'; // 実際のGAS URLに差し替えてください
-const colors = ["", "赤H", "赤V", "青H", "青V", "黄H", "黄V", "緑H", "緑V", "紫H", "紫V"];
-const tuningSlot1Colors = ["", "赤", "青", "黄", "緑", "紫"];
+const gasUrl = 'YOUR_GAS_URL';      // ← 必ず差し替え
+const colors = ["", "赤H","赤V","青H","青V","黄H","黄V","緑H","緑V","紫H","紫V"];
+const tuningSlot1Colors = ["", "赤","青","黄","緑","紫"];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const res = await fetch(`${gasUrl}?mode=companies`);
-  const companies = await res.json();
-  const select = document.getElementById('company');
-  companies.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c;
-    opt.textContent = c;
-    select.appendChild(opt);
-  });
+  /* ── 会社一覧を取得 ── */
+  try{
+    const res = await fetch(`${gasUrl}?mode=companies`);
+    const companies = await res.json();
+    const companySel = document.getElementById('company');
+    companies.forEach(c=>{
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      companySel.appendChild(opt);
+    });
+  }catch(e){
+    document.getElementById('error-message').textContent='会社一覧の取得に失敗しました';
+    console.error(e);
+  }
 
-  // スペシャルチューニングスキルドロップダウンを10個生成
+  /* ── スペシャルチューニングのドロップダウン生成 ── */
   const container = document.getElementById('special-tunings');
-  for (let i = 0; i < 10; i++) {
-    const select = document.createElement('select');
-    select.name = `special${i+1}`;
-    (i === 0 ? tuningSlot1Colors : colors).forEach(col => {
+  for(let i=0;i<10;i++){
+    const selectEl = document.createElement('select');   // ← 変数名を変更
+    selectEl.name = `special${i+1}`;
+    (i===0?tuningSlot1Colors:colors).forEach(col=>{
       const opt = document.createElement('option');
       opt.value = col;
       opt.textContent = col || '--未選択--';
-      select.appendChild(opt);
+      selectEl.appendChild(opt);
     });
-    container.appendChild(select);
+    selectEl.addEventListener('change', checkForm);      // ← change 監視を追加
+    container.appendChild(selectEl);
   }
   checkForm();
 });
 
-function checkForm() {
+function checkForm(){
   const company = document.getElementById('company').value;
   const selects = document.querySelectorAll('#special-tunings select');
-  const anySelected = Array.from(selects).some(s => s.value);
+  const anySelected = Array.from(selects).some(s=>s.value);
   document.getElementById('search-btn').disabled = !(company && anySelected);
 }
 
-function colorClass(color) {
-  if (!color) return '';
-  if (color.includes("赤")) return 'red';
-  if (color.includes("青")) return 'blue';
-  if (color.includes("黄")) return 'yellow';
-  if (color.includes("緑")) return 'green';
-  if (color.includes("紫")) return 'purple';
+function colorClass(color){
+  if(!color) return '';
+  if(color.includes('赤')) return 'red';
+  if(color.includes('青')) return 'blue';
+  if(color.includes('黄')) return 'yellow';
+  if(color.includes('緑')) return 'green';
+  if(color.includes('紫')) return 'purple';
   return '';
 }
 
-async function search() {
+async function search(){
   const company = document.getElementById('company').value;
-  const params = new URLSearchParams();
-  params.append('company', company);
-
-  document.getElementById('record-count').textContent = '検索中...';
-
+  const params = new URLSearchParams({company});
   const selects = document.querySelectorAll('#special-tunings select');
-  selects.forEach((s, i) => {
-    if (s.value) params.append(`sp${i+1}`, s.value);
+  selects.forEach((s,i)=>{
+    if(s.value) params.append(`sp${i+1}`, s.value);      // 必要なら special${i+1} に変更
   });
 
-  const res = await fetch(`${gasUrl}?` + params.toString());
-  const data = await res.json();
+  document.getElementById('record-count').textContent='検索中...';
+  try{
+    const res = await fetch(`${gasUrl}?${params.toString()}`);
+    const data = await res.json();
 
-  document.getElementById('results').innerHTML = '';
-  document.getElementById('record-count').textContent = `取得件数：${data.length}`;
+    const resultsEl = document.getElementById('results');
+    resultsEl.innerHTML='';
+    document.getElementById('record-count').textContent=`取得件数：${data.length}`;
+    if(!data.length){
+      resultsEl.innerHTML='<li>該当するコスチュームが見つかりませんでした。</li>';
+      return;
+    }
 
-  if (data.length === 0) {
-    document.getElementById('results').innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
-    return;
+    data.forEach(item=>{
+      const li=document.createElement('li');
+      const sp1=`<div class="slot-box ${colorClass(item.main_color)}">${item.main_color||''}</div>`;
+      const sp2=`<div class="slot-box ${colorClass(item.sub_color)}">${item.sub_color||''}</div>`;
+      const tuningBoxes=item.details.map(skill=>`<div class="slot-box ${colorClass(skill)}">${skill||''}</div>`);
+      const left=tuningBoxes.slice(0,5).join('');
+      const right=tuningBoxes.slice(5,10).join('');
+
+      li.innerHTML=`
+        <strong>コスチューム：${item.costume}</strong><br>
+        キャラクター：${item.character}<br>
+        スペシャルチューニング：<br>${sp1} ${sp2}<br>
+        チューニングスキル：
+        <div class="row">
+          <div class="column">${left}</div>
+          <div class="column">${right}</div>
+        </div>
+      `;
+      resultsEl.appendChild(li);
+    });
+  }catch(e){
+    document.getElementById('error-message').textContent='検索に失敗しました';
+    console.error(e);
   }
-
-  data.forEach(item => {
-    const li = document.createElement('li');
-    const sp1 = `<div class="slot-box ${colorClass(item.main_color)}">${item.main_color || ''}</div>`;
-    const sp2 = `<div class="slot-box ${colorClass(item.sub_color)}">${item.sub_color || ''}</div>`;
-
-    const tuningBoxes = item.details.map(skill => `<div class="slot-box ${colorClass(skill)}">${skill || ''}</div>`);
-    const left = tuningBoxes.slice(0, 5).join('');
-    const right = tuningBoxes.slice(5, 10).join('');
-
-    li.innerHTML = `
-      <strong>コスチューム：${item.costume}</strong><br>
-      キャラクター：${item.character}<br>
-      スペシャルチューニング：<br>${sp1} ${sp2}<br>
-      チューニングスキル：
-      <div class="row">
-        <div class="column">${left}</div>
-        <div class="column">${right}</div>
-      </div>
-    `;
-    document.getElementById('results').appendChild(li);
-  });
 }
 </script>
 </body>
