@@ -2,84 +2,404 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ヒロアカURコスチューム検索</title>
 <style>
-  body { font-family: sans-serif; margin: 2rem; background: #f9f9f9; }
-  select, button { padding: .5rem; margin: .5rem 0; font-size: 1rem; }
-  label { margin-right: 1rem; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 1rem;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.8s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .header {
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+  }
+  
+  .header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .header p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+  
+  .form-section {
+    padding: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 2rem;
+  }
+  
+  .form-group h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .form-group h3::before {
+    content: '✨';
+    font-size: 1.2rem;
+  }
+  
+  select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    cursor: pointer;
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  select:hover {
+    border-color: #667eea;
+  }
+  
+  .sp-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  @media (max-width: 600px) {
+    .sp-group {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .search-button {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .search-button:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .search-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  }
+  
+  .search-button:not(:disabled):active {
+    transform: translateY(0);
+  }
+  
   .slot-box {
-    display: inline-block; width: 30px; height: 30px; border: 2px solid;
-    margin: 2px; text-align: center; line-height: 30px;
-    font-size: .7rem; font-weight: bold;
-  }
-  .red { border-color: red; }
-  .blue { border-color: blue; }
-  .yellow { border-color: gold; }
-  .green { border-color: green; }
-  .purple { border-color: purple; }
-  #results li {
-    background: #fff; border: 1px solid #ccc;
-    padding: 1rem; margin-bottom: 1rem; border-radius: 8px;
-  }
-  .row { display: flex; }
-  .column { flex: 1; }
-  #loading-message {
-    color: blue;
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    border: 3px solid;
+    margin: 3px;
+    text-align: center;
+    line-height: 29px;
+    font-size: 0.8rem;
     font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .slot-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .slot-box:hover::before {
+    left: 100%;
+  }
+  
+  .red { 
+    border-color: #e74c3c; 
+    background: rgba(231, 76, 60, 0.1);
+  }
+  .blue { 
+    border-color: #3498db; 
+    background: rgba(52, 152, 219, 0.1);
+  }
+  .yellow { 
+    border-color: #f39c12; 
+    background: rgba(243, 156, 18, 0.1);
+  }
+  .green { 
+    border-color: #27ae60; 
+    background: rgba(39, 174, 96, 0.1);
+  }
+  .purple { 
+    border-color: #9b59b6; 
+    background: rgba(155, 89, 182, 0.1);
+  }
+  
+  .message {
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+  
+  .error-message {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    border: 2px solid rgba(231, 76, 60, 0.2);
+  }
+  
+  .loading-message {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border: 2px solid rgba(52, 152, 219, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .results-section {
+    padding: 0 2rem 2rem;
+  }
+  
+  .record-count {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  #results {
+    list-style: none;
+  }
+  
+  #results li {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  #results li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+  }
+  
+  #results li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .costume-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+  }
+  
+  .costume-details {
+    padding-left: 1rem;
+    line-height: 1.8;
+  }
+  
+  .skill-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .skill-column {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+    color: #7f8c8d;
+    font-size: 1.1rem;
+  }
+  
+  .no-results::before {
+    content: '🔍';
+    display: block;
+    font-size: 3rem;
     margin-bottom: 1rem;
   }
 </style>
 </head>
 <body>
 
-<h2>キャラクターを選択</h2>
-<select id="character" onchange="checkForm()">
-  <option value="">--選択--</option>
-  <option value="山田">山田</option>
-  <option value="緑谷">緑谷</option>
-  <option value="爆豪">爆豪</option>
-</select>
+<div class="container">
+  <div class="header">
+    <h1>🦸‍♂️ ヒロアカUR検索</h1>
+    <p>お気に入りのコスチュームを見つけよう</p>
+  </div>
+  
+  <div class="form-section">
+    <div class="form-group">
+      <h3>キャラクター選択</h3>
+      <select id="character" onchange="checkForm()">
+        <option value="">--キャラクターを選択してください--</option>
+        <option value="山田">山田</option>
+        <option value="緑谷">緑谷</option>
+        <option value="爆豪">爆豪</option>
+      </select>
+    </div>
 
-<h2>SPチューニング（最大2種類）</h2>
-<select id="sp1" onchange="checkForm()">
-  <option value="">--未選択--</option>
-  <option value="赤H">赤H</option><option value="赤V">赤V</option>
-  <option value="青H">青H</option><option value="青V">青V</option>
-  <option value="黄H">黄H</option><option value="黄V">黄V</option>
-  <option value="緑H">緑H</option><option value="緑V">緑V</option>
-  <option value="紫H">紫H</option><option value="紫V">紫V</option>
-</select>
-<select id="sp2" onchange="checkForm()">
-  <option value="">--未選択--</option>
-  <option value="赤H">赤H</option><option value="赤V">赤V</option>
-  <option value="青H">青H</option><option value="青V">青V</option>
-  <option value="黄H">黄H</option><option value="黄V">黄V</option>
-  <option value="緑H">緑H</option><option value="緑V">緑V</option>
-  <option value="紫H">紫H</option><option value="紫V">紫V</option>
-</select>
+    <div class="form-group">
+      <h3>SPチューニング（最大2種類）</h3>
+      <div class="sp-group">
+        <select id="sp1" onchange="checkForm()">
+          <option value="">--1つ目を選択--</option>
+          <option value="赤H">赤H</option><option value="赤V">赤V</option>
+          <option value="青H">青H</option><option value="青V">青V</option>
+          <option value="黄H">黄H</option><option value="黄V">黄V</option>
+          <option value="緑H">緑H</option><option value="緑V">緑V</option>
+          <option value="紫H">紫H</option><option value="紫V">紫V</option>
+        </select>
+        <select id="sp2" onchange="checkForm()">
+          <option value="">--2つ目を選択--</option>
+          <option value="赤H">赤H</option><option value="赤V">赤V</option>
+          <option value="青H">青H</option><option value="青V">青V</option>
+          <option value="黄H">黄H</option><option value="黄V">黄V</option>
+          <option value="緑H">緑H</option><option value="緑V">緑V</option>
+          <option value="紫H">紫H</option><option value="紫V">紫V</option>
+        </select>
+      </div>
+    </div>
 
-<p id="error-message" style="color:red;"></p>
-<p id="loading-message" style="display:none;">読み込み中です。お待ちください...</p>
+    <div id="error-message" class="message error-message" style="display:none;"></div>
+    <div id="loading-message" class="message loading-message" style="display:none;">
+      <div class="loading-spinner"></div>
+      <span>読み込み中です。お待ちください...</span>
+    </div>
 
-<button id="search-btn" onclick="search()" disabled>検索</button>
-<p id="record-count"></p>
-<ul id="results"></ul>
+    <button id="search-btn" class="search-button" onclick="search()" disabled>
+      🔍 検索開始
+    </button>
+  </div>
+  
+  <div class="results-section">
+    <div id="record-count" class="record-count" style="display:none;"></div>
+    <ul id="results"></ul>
+  </div>
+</div>
 
 <script>
-const gasUrl = 'https://script.google.com/macros/s/AKfycbxbuI0V38GseqRQ0wdzD2a2_Eo8RTW0OyECCicFZ6u4IXGTTeUwLEtSjQYY9xneBkH_/exec';  // ← 必ず差し替え
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxbuI0V38GseqRQ0wdzD2a2_Eo8RTW0OyECCicFZ6u4IXGTTeUwLEtSjQYY9xneBkH_/exec';
 let allData = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const loadingMsg = document.getElementById('loading-message');
-  loadingMsg.style.display = 'block';
-  loadingMsg.textContent = '初期データを読み込み中です...';
+  loadingMsg.style.display = 'flex';
+  loadingMsg.querySelector('span').textContent = '初期データを読み込み中です...';
 
   try {
     const res = await fetch(`${gasUrl}?mode=all`);
     allData = await res.json();
     console.log("全データ取得済", allData);
   } catch (e) {
-    document.getElementById('error-message').textContent = 'データ取得に失敗しました';
+    const errorMsg = document.getElementById('error-message');
+    errorMsg.textContent = 'データ取得に失敗しました';
+    errorMsg.style.display = 'block';
     console.error(e);
   }
 
@@ -92,7 +412,9 @@ function checkForm() {
   const sp1 = document.getElementById('sp1').value;
   const sp2 = document.getElementById('sp2').value;
   const valid = char && (sp1 || sp2);
-  document.getElementById('search-btn').disabled = !valid;
+  const btn = document.getElementById('search-btn');
+  btn.disabled = !valid;
+  btn.textContent = valid ? '🔍 検索開始' : '⚠️ 条件を入力してください';
 }
 
 function colorClass(color) {
@@ -109,7 +431,7 @@ function matchesSP(spField, condColor) {
   if (!condColor) return true;
   const [condBase, condHV] = [condColor.slice(0, -1), condColor.slice(-1)];
   if (!spField) return false;
-  if (spField === condBase) return true; // 色のみでも一致
+  if (spField === condBase) return true;
   return spField === condColor;
 }
 
@@ -128,11 +450,10 @@ function search() {
   const resultsEl = document.getElementById('results');
   const recordCount = document.getElementById('record-count');
 
-  // ローディング表示ON
-  loadingMsg.textContent = '検索中です。お待ちください...';
-  loadingMsg.style.display = 'block';
+  loadingMsg.querySelector('span').textContent = '検索中です。お待ちください...';
+  loadingMsg.style.display = 'flex';
   resultsEl.innerHTML = '';
-  recordCount.textContent = '';
+  recordCount.style.display = 'none';
 
   setTimeout(() => {
     const results = allData.filter(item => {
@@ -145,10 +466,11 @@ function search() {
     });
 
     resultsEl.innerHTML = '';
-    recordCount.textContent = `取得件数：${results.length}`;
+    recordCount.textContent = `✨ 取得件数：${results.length}件`;
+    recordCount.style.display = 'block';
 
     if (!results.length) {
-      resultsEl.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+      resultsEl.innerHTML = '<li class="no-results">該当するコスチュームが見つかりませんでした</li>';
     } else {
       results.forEach(item => {
         const li = document.createElement('li');
@@ -162,22 +484,24 @@ function search() {
         const right = tuningBoxes.slice(5).join('');
 
         li.innerHTML = `
-          <strong>コスチューム：${item.costume}</strong><br>
-          キャラクター：${item.character}<br>
-          スペシャルチューニング：<br>${sp1Box} ${sp2Box}<br>
-          チューニングスキル：
-          <div class="row">
-            <div class="column">${left}</div>
-            <div class="column">${right}</div>
+          <div class="costume-title">🎭 ${item.costume}</div>
+          <div class="costume-details">
+            <strong>👤 キャラクター：</strong>${item.character}<br>
+            <strong>⚡ SPチューニング：</strong><br>
+            <div style="margin: 0.5rem 0;">${sp1Box} ${sp2Box}</div>
+            <strong>🎯 チューニングスキル：</strong>
+            <div class="skill-row">
+              <div class="skill-column">${left}</div>
+              <div class="skill-column">${right}</div>
+            </div>
           </div>
         `;
         resultsEl.appendChild(li);
       });
     }
 
-    // ローディング表示OFF
     loadingMsg.style.display = 'none';
-  }, 300); // UX向上用の遅延（実際はなくてもOK）
+  }, 300);
 }
 </script>
 </body>
