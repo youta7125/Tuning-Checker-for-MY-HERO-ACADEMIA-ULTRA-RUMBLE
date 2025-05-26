@@ -4,16 +4,34 @@
 <meta charset="UTF-8">
 <title>ヒロアカURコスチューム検索</title>
 <style>
-  body{font-family:sans-serif;margin:2rem;background:#f9f9f9}
-  select,button{padding:.5rem;margin:.5rem 0;font-size:1rem}
-  label{margin-right:1rem}
-  .slot-box{display:inline-block;width:30px;height:30px;border:2px solid;margin:2px;text-align:center;line-height:30px;font-size:.7rem;font-weight:bold}
-  .red{border-color:red}.blue{border-color:blue}.yellow{border-color:gold}.green{border-color:green}.purple{border-color:purple}
-  #results li{background:#fff;border:1px solid #ccc;padding:1rem;margin-bottom:1rem;border-radius:8px}
-  .row{display:flex}.column{flex:1}
+  body { font-family: sans-serif; margin: 2rem; background: #f9f9f9; }
+  select, button { padding: .5rem; margin: .5rem 0; font-size: 1rem; }
+  label { margin-right: 1rem; }
+  .slot-box {
+    display: inline-block; width: 30px; height: 30px; border: 2px solid;
+    margin: 2px; text-align: center; line-height: 30px;
+    font-size: .7rem; font-weight: bold;
+  }
+  .red { border-color: red; }
+  .blue { border-color: blue; }
+  .yellow { border-color: gold; }
+  .green { border-color: green; }
+  .purple { border-color: purple; }
+  #results li {
+    background: #fff; border: 1px solid #ccc;
+    padding: 1rem; margin-bottom: 1rem; border-radius: 8px;
+  }
+  .row { display: flex; }
+  .column { flex: 1; }
+  #loading-message {
+    color: blue;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
 </style>
 </head>
 <body>
+
 <h2>キャラクターを選択</h2>
 <select id="character" onchange="checkForm()">
   <option value="">--選択--</option>
@@ -41,15 +59,21 @@
 </select>
 
 <p id="error-message" style="color:red;"></p>
+<p id="loading-message" style="display:none;">読み込み中です。お待ちください...</p>
+
 <button id="search-btn" onclick="search()" disabled>検索</button>
 <p id="record-count"></p>
 <ul id="results"></ul>
 
 <script>
-const gasUrl = 'https://script.google.com/macros/s/AKfycbxbuI0V38GseqRQ0wdzD2a2_Eo8RTW0OyECCicFZ6u4IXGTTeUwLEtSjQYY9xneBkH_/exec';  // ← 本番用に差し替え
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxbuI0V38GseqRQ0wdzD2a2_Eo8RTW0OyECCicFZ6u4IXGTTeUwLEtSjQYY9xneBkH_/exec';  // ← 必ず差し替え
 let allData = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const loadingMsg = document.getElementById('loading-message');
+  loadingMsg.style.display = 'block';
+  loadingMsg.textContent = '初期データを読み込み中です...';
+
   try {
     const res = await fetch(`${gasUrl}?mode=all`);
     allData = await res.json();
@@ -58,6 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('error-message').textContent = 'データ取得に失敗しました';
     console.error(e);
   }
+
+  loadingMsg.style.display = 'none';
   checkForm();
 });
 
@@ -70,12 +96,12 @@ function checkForm() {
 }
 
 function colorClass(color) {
-  if(!color) return '';
-  if(color.includes('赤')) return 'red';
-  if(color.includes('青')) return 'blue';
-  if(color.includes('黄')) return 'yellow';
-  if(color.includes('緑')) return 'green';
-  if(color.includes('紫')) return 'purple';
+  if (!color) return '';
+  if (color.includes('赤')) return 'red';
+  if (color.includes('青')) return 'blue';
+  if (color.includes('黄')) return 'yellow';
+  if (color.includes('緑')) return 'green';
+  if (color.includes('紫')) return 'purple';
   return '';
 }
 
@@ -83,8 +109,14 @@ function matchesSP(spField, condColor) {
   if (!condColor) return true;
   const [condBase, condHV] = [condColor.slice(0, -1), condColor.slice(-1)];
   if (!spField) return false;
-  if (spField === condBase) return true;  // 色だけ（例：赤）でもヒット
+  if (spField === condBase) return true; // 色のみでも一致
   return spField === condColor;
+}
+
+function formatSP(value) {
+  if (!value) return '';
+  const lastChar = value.slice(-1);
+  return ['H', 'V'].includes(lastChar) ? lastChar : '';
 }
 
 function search() {
@@ -92,54 +124,60 @@ function search() {
   const sp1 = document.getElementById('sp1').value;
   const sp2 = document.getElementById('sp2').value;
 
-  const results = allData.filter(item => {
-    if (item.character !== char) return false;
-
-    const fields = [item.sp1, item.sp2];
-    const spConds = [sp1, sp2].filter(v => v);
-
-    // 全ての検索条件がマッチするか
-    return spConds.every(cond => fields.some(field => matchesSP(field, cond)));
-  });
-
+  const loadingMsg = document.getElementById('loading-message');
   const resultsEl = document.getElementById('results');
+  const recordCount = document.getElementById('record-count');
+
+  // ローディング表示ON
+  loadingMsg.textContent = '検索中です。お待ちください...';
+  loadingMsg.style.display = 'block';
   resultsEl.innerHTML = '';
-  document.getElementById('record-count').textContent = `取得件数：${results.length}`;
+  recordCount.textContent = '';
 
-  if (!results.length) {
-    resultsEl.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
-    return;
-  }
+  setTimeout(() => {
+    const results = allData.filter(item => {
+      if (item.character !== char) return false;
 
-  results.forEach(item => {
-    const li = document.createElement('li');
-    const sp1Box = `<div class="slot-box ${colorClass(item.sp1)}">${formatSP(item.sp1)}</div>`;
-    const sp2Box = `<div class="slot-box ${colorClass(item.sp2)}">${formatSP(item.sp2)}</div>`;
-    const tuningBoxes = item.tunings.map(skill =>
-      `<div class="slot-box ${colorClass(skill)}">${formatSP(skill)}</div>`
-    );
+      const fields = [item.sp1, item.sp2];
+      const spConds = [sp1, sp2].filter(v => v);
 
-    const left = tuningBoxes.slice(0, 5).join('');
-    const right = tuningBoxes.slice(5).join('');
+      return spConds.every(cond => fields.some(field => matchesSP(field, cond)));
+    });
 
-    li.innerHTML = `
-      <strong>コスチューム：${item.costume}</strong><br>
-      キャラクター：${item.character}<br>
-      スペシャルチューニング：<br>${sp1Box} ${sp2Box}<br>
-      チューニングスキル：
-      <div class="row">
-        <div class="column">${left}</div>
-        <div class="column">${right}</div>
-      </div>
-    `;
-    resultsEl.appendChild(li);
-  });
-}
+    resultsEl.innerHTML = '';
+    recordCount.textContent = `取得件数：${results.length}`;
 
-function formatSP(value) {
-  if (!value) return '';
-  if (["H", "V"].includes(value.slice(-1))) return value.slice(-1);
-  return ''; // 色のみ（赤、青など）
+    if (!results.length) {
+      resultsEl.innerHTML = '<li>該当するコスチュームが見つかりませんでした。</li>';
+    } else {
+      results.forEach(item => {
+        const li = document.createElement('li');
+        const sp1Box = `<div class="slot-box ${colorClass(item.sp1)}">${formatSP(item.sp1)}</div>`;
+        const sp2Box = `<div class="slot-box ${colorClass(item.sp2)}">${formatSP(item.sp2)}</div>`;
+        const tuningBoxes = item.tunings.map(skill =>
+          `<div class="slot-box ${colorClass(skill)}">${formatSP(skill)}</div>`
+        );
+
+        const left = tuningBoxes.slice(0, 5).join('');
+        const right = tuningBoxes.slice(5).join('');
+
+        li.innerHTML = `
+          <strong>コスチューム：${item.costume}</strong><br>
+          キャラクター：${item.character}<br>
+          スペシャルチューニング：<br>${sp1Box} ${sp2Box}<br>
+          チューニングスキル：
+          <div class="row">
+            <div class="column">${left}</div>
+            <div class="column">${right}</div>
+          </div>
+        `;
+        resultsEl.appendChild(li);
+      });
+    }
+
+    // ローディング表示OFF
+    loadingMsg.style.display = 'none';
+  }, 300); // UX向上用の遅延（実際はなくてもOK）
 }
 </script>
 </body>
